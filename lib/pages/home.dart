@@ -1,4 +1,6 @@
 import 'package:fitness/models/category_model.dart';
+import 'package:fitness/models/diet_model.dart';
+import 'package:fitness/models/popular_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -10,12 +12,23 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  List<CategoryModel> Categories = [];
+  List<CategoryModel> categories = [];
+  List<DietModel> diets = [];
+  List<PopularDietsModel> popularDiets = [];
 
-  void _getCategories() {
-    Categories = CategoryModel.getCategories();
+  // void _getCategories() {
+  //   Categories = CategoryModel.getCategories();
+  // }
+
+  // void _getDiets() {
+  //   diets = DietModel.getDiets();
+  // }
+
+  void _getInitialInfo() {
+    categories = CategoryModel.getCategories();
+    diets = DietModel.getDiets();
+    popularDiets = PopularDietsModel.getPopularDiets();
   }
-
   // @override
   // void initState(){
   //   _getCategories();
@@ -23,22 +36,210 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    _getCategories();
+    _getInitialInfo();
     return Scaffold(
       appBar: appBar(),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      body: ListView(
         children: [
           _searchField(),
           const SizedBox(height: 40),
-          _categoriesSection()
+          _categoriesSection(),
+          const SizedBox(height: 40),
+          _dietSection(),
+          const SizedBox(height: 40),
+          _popularSection(),
+          const SizedBox(height: 40),
         ],
       ),
     );
   }
 
+//-----------Popular--------------------
+
+  Column _popularSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Padding(
+          padding: EdgeInsets.only(left: 20),
+          child: Text(
+            'Popular',
+            style: TextStyle(
+                fontSize: 18, fontWeight: FontWeight.w600, color: Colors.black),
+          ),
+        ),
+        const SizedBox(height: 15),
+        ListView.separated(
+          itemCount: popularDiets.length,
+          separatorBuilder: (context, index) => const SizedBox(
+            height: 25,
+          ),
+          shrinkWrap: true,
+          itemBuilder: (context, index) {
+            return Padding(
+              padding: const EdgeInsets.only(left: 20, right: 20),
+              child: Container(
+                height: 100,
+                decoration: BoxDecoration(
+                  color: popularDiets[index].boxIsSelected
+                      ? Colors.white
+                      : Colors.transparent,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: popularDiets[index].boxIsSelected
+                      ? [
+                          BoxShadow(
+                              color: const Color(0xff1D1617).withOpacity(0.07),
+                              offset: const Offset(0, 10),
+                              blurRadius: 40,
+                              spreadRadius: 0)
+                        ]
+                      : [],
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    SvgPicture.asset(
+                      popularDiets[index].iconPath,
+                      width: 65,
+                      height: 65,
+                    ),
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          popularDiets[index].name,
+                          style: const TextStyle(
+                              fontWeight: FontWeight.w500,
+                              color: Colors.black,
+                              fontSize: 16),
+                        ),
+                        Text(
+                          '${popularDiets[index].level} | ${popularDiets[index].duration} | ${popularDiets[index].calorie}',
+                          style: const TextStyle(
+                              color: Color(0xff7B6F72),
+                              fontSize: 13,
+                              fontWeight: FontWeight.w400),
+                        ),
+                      ],
+                    ),
+                    GestureDetector(
+                      onTap: () {},
+                      child: SvgPicture.asset(
+                        'assets/icons/button.svg',
+                        width: 30,
+                        height: 30,
+                      ),
+                    )
+                  ],
+                ),
+              ),
+            );
+          },
+        )
+      ],
+    );
+  }
+
+//-----------------DIET-----------------
+
+  Column _dietSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Padding(
+          padding: EdgeInsets.only(left: 20),
+          child: Text(
+            'Recommendation\nfor Diet',
+            style: TextStyle(
+                color: Colors.black, fontSize: 18, fontWeight: FontWeight.w600),
+          ),
+        ),
+        const SizedBox(
+          height: 15,
+        ),
+        Container(
+          // color: Colors.amber,
+          height: 240,
+          child: ListView.separated(
+            itemBuilder: (context, index) {
+              return Container(
+                width: 210,
+                decoration: BoxDecoration(
+                  color: diets[index].boxColor.withOpacity(0.3),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    SvgPicture.asset(diets[index].iconPath),
+                    Column(
+                      children: [
+                        Text(
+                          diets[index].name,
+                          style: const TextStyle(
+                              fontWeight: FontWeight.w500,
+                              color: Colors.black,
+                              fontSize: 16),
+                        ),
+                        Text(
+                          '${diets[index].level} | ${diets[index].duration} | ${diets[index].calorie}',
+                          style: const TextStyle(
+                            color: Color(0xff7B6F72),
+                            fontSize: 13,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Container(
+                      height: 45,
+                      width: 130,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            diets[index].viewIsSelected
+                                ? const Color(0xff9DCEFF)
+                                : Colors.transparent,
+                            diets[index].viewIsSelected
+                                ? const Color(0xff92A3FD)
+                                : Colors.transparent,
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(50),
+                      ),
+                      child: Center(
+                        child: Text(
+                          'View',
+                          style: TextStyle(
+                            color: diets[index].viewIsSelected
+                                ? Colors.white
+                                : const Color(0xffC58BF2),
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
+                    )
+                  ],
+                ),
+              );
+            },
+            separatorBuilder: (context, index) => const SizedBox(width: 25),
+            itemCount: diets.length,
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.only(left: 20, right: 20),
+          ),
+        )
+      ],
+    );
+  }
+
+//----------------Categories---------------------------
+
   Column _categoriesSection() {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Padding(
           padding: EdgeInsets.only(left: 20),
@@ -52,15 +253,15 @@ class _HomePageState extends State<HomePage> {
         Container(
           height: 150,
           child: ListView.separated(
-            itemCount: Categories.length,
+            itemCount: categories.length,
             scrollDirection: Axis.horizontal,
-            padding: EdgeInsets.only(left: 20, right: 20),
-            separatorBuilder: (context, index) => SizedBox(width: 25),
+            padding: const EdgeInsets.only(left: 20, right: 20),
+            separatorBuilder: (context, index) => const SizedBox(width: 25),
             itemBuilder: (context, index) {
               return Container(
                 width: 100,
                 decoration: BoxDecoration(
-                  color: Categories[index].boxColor.withOpacity(0.3),
+                  color: categories[index].boxColor.withOpacity(0.3),
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Column(
@@ -69,18 +270,18 @@ class _HomePageState extends State<HomePage> {
                     Container(
                       width: 50,
                       height: 50,
-                      decoration: BoxDecoration(
+                      decoration: const BoxDecoration(
                         color: Colors.white,
                         shape: BoxShape.circle,
                       ),
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: SvgPicture.asset(Categories[index].iconPath),
+                        child: SvgPicture.asset(categories[index].iconPath),
                       ),
                     ),
                     Text(
-                      Categories[index].name,
-                      style: TextStyle(
+                      categories[index].name,
+                      style: const TextStyle(
                         fontWeight: FontWeight.w400,
                         color: Colors.black,
                         fontSize: 14,
@@ -95,6 +296,8 @@ class _HomePageState extends State<HomePage> {
       ],
     );
   }
+
+//------------------------SEARCH FIELD---------------
 
   Container _searchField() {
     return Container(
@@ -147,6 +350,8 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  //--------------APPBAR----------------------------
+
   AppBar appBar() {
     return AppBar(
       backgroundColor: Colors.white,
@@ -158,7 +363,29 @@ class _HomePageState extends State<HomePage> {
       centerTitle: true,
       elevation: 0,
       leading: GestureDetector(
-        onTap: () {},
+        onTap: () {
+          showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: const Text('Exit App'),
+              content: const Text('Are you sure you want to exit the app'),
+              actions: [
+                TextButton(
+                  onPressed: () =>
+                      Navigator.of(context).pop(), // Close the dialog
+                  child: const Text('Cancel'),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop(); // Close the dialog
+                    Navigator.pop(context); // Exit the current screen
+                  },
+                  child: const Text('Exit'),
+                ),
+              ],
+            ),
+          );
+        },
         child: Container(
           alignment: Alignment.center,
           margin: const EdgeInsets.all(10),
